@@ -2,16 +2,20 @@
 locals {
   connectivity_private = length(var.subnet_ids) > 0 ? true : false
   ip_address_type      = local.connectivity_private ? "Private" : "Public"
+  dns_name_label       = local.connectivity_private ? null : var.dns_name_label
+  subnet_ids           = local.connectivity_private ? null : var.subnet_ids
 }
 
 resource "azurerm_container_group" "container_group" {
   name                = var.name
   location            = var.location
   resource_group_name = var.resource_group_name
-  ip_address_type     = local.ip_address_type
-  dns_name_label      = var.dns_name_label
   os_type             = var.os_type
   restart_policy      = var.restart_policy
+
+  subnet_ids      = local.subnet_ids
+  dns_name_label  = local.dns_name_label
+  ip_address_type = local.ip_address_type
 
   dynamic "image_registry_credential" {
     for_each = var.image_registry_credentials
